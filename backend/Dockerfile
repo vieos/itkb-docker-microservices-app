@@ -24,12 +24,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy existing application directory contents
 COPY . /var/www
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
+# Set permissions to apache user and group, fallback to www-data if apache user does not exist
+RUN if id apache >/dev/null 2>&1; then chown -R apache:apache /var/www; else chown -R www-data:www-data /var/www; fi && chmod -R 755 /var/www
 
 # Clear Laravel caches and compiled files before install
-RUN rm -rf bootstrap/cache/* || true && \
-    php artisan config:clear || true && \
+RUN rm -rf bootstrap/cache/* || true
+
+# Clear Laravel caches and compiled files before install
+RUN php artisan config:clear || true && \
     php artisan cache:clear || true && \
     php artisan route:clear || true && \
     php artisan view:clear || true
