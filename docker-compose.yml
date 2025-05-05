@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: itkb_backend
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+      - ./backend/storage:/var/www/storage
+    ports:
+      - "9000:9000"
+    networks:
+      - itkb_network
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=itkb
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: itkb_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - itkb_network
+
+  db:
+    image: mysql:8.0
+    container_name: itkb_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: itkb
+      MYSQL_USER: itkbuser
+      MYSQL_PASSWORD: itkbpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - itkb_network
+
+networks:
+  itkb_network:
+    driver: bridge
+
+volumes:
+  dbdata:
