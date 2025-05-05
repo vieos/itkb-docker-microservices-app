@@ -5,14 +5,14 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm install
 
 # Copy app files
 COPY . .
 
 # Build the app
-RUN yarn build
+RUN npm run build
 
 # Use a lightweight web server to serve the build
 FROM nginx:alpine
